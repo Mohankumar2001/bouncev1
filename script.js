@@ -1,9 +1,14 @@
 var myGamePiece;
 var myObstacle = [];
+var myScore;
+var myMusic;
 
 function startgame() {
 	myGameArea.start();
-	myGamePiece = new component(30,30,"red",10,120);
+	myGamePiece = new component(40,40,"assets/blueball1.png",10,120,"image");
+	myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+	myMusic = new sound("assets/bgm.mp3");
+	
 	}
 
 var myGameArea = {
@@ -24,22 +29,40 @@ var myGameArea = {
     }
 }
 
-function component(width ,height ,color ,x , y) {
+function component(width ,height ,color ,x , y,type) {
+	this.type = type;
 	this.height = height;
 	this.width = width;
 	this.x = x;
 	this.y = y;
 	this.speedX = 0;
 	this.speedY = 0;
+	this.gravity = 0.05;
+	this.gravitySpeed = 0;
+	this.bounce = 0.6;
 	this.newPos = function() {
+		this.gravitySpeed += this.gravity;
 		this.x += this.speedX;
-		this.y += this.speedY;
-		
+		this.y += this.speedY + this.gravitySpeed;
+		this.hitBottom();
 	}
 	this.update = function() {
 		ctx = myGameArea.context;
-	    ctx.fillStyle = color;
-	    ctx.fillRect(this.x,this.y,this.width,this.height);
+		if(this.type == "text") {			
+			ctx.font = this.width + " " + this.height;
+			ctx.fillStyle = color;
+			ctx.fillText(this.text,this.x,this.y);
+		}
+		else if(this.type == "image") {
+			this.image = new Image();
+			this.image.src = color;
+			ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
+		}
+		else {
+	        ctx.fillStyle = color;
+	        ctx.fillRect(this.x,this.y,this.width,this.height);
+		}
+		
 	}
 	this.crashWith = function(otherObj) {
 		var myLeft = this.x;
@@ -56,6 +79,13 @@ function component(width ,height ,color ,x , y) {
         }
         return crash;
 	}
+	this.hitBottom = function() {
+		var rockBottom = myGameArea.canvas.height - this.height;
+		if(this.y>rockBottom) {
+			this.y = rockBottom;
+			this.gravitySpeed = -(this.gravitySpeed*this.bounce);
+		}
+	}
 	
 }
 
@@ -65,6 +95,7 @@ function updateGameArea() {
 	for(i=0;i<myObstacle.length;i++) {
 	    if(myGamePiece.crashWith(myObstacle[i])){
 		    myGameArea.stop();
+		    myMusic.play();
 		    return;
 	    }
 	}
@@ -78,6 +109,8 @@ function updateGameArea() {
 		myObstacle[i].y +=1
 		myObstacle[i].update();
 	}
+	
+	myScore.update();
 	myGamePiece.newPos();
 	myGamePiece.update();
 
@@ -85,10 +118,31 @@ function updateGameArea() {
 }
 
 function everyInterval(n) {
-	if((myGameArea.frameNo/n)%1 == 0)
+	if((myGameArea.frameNo/n)%1 == 0) {
+		myScore.text = "SCORE:"+myGameArea.frameNo/n;
 		return true;
+	}
 	else
 		return false;
+}
+
+function accelerate(n) {
+    myGamePiece.gravity = n;
+}
+
+function sound(src) {
+	this.sound = document.createElement("audio");
+	this.sound.src = src;
+	this.sound.setAttribute = ("preload","auto");
+	this.sound.setAttribute = ("controls","none");
+	this.sound.style.display = "none";
+	document.body.appendChild(this.sound);
+	this.play = function() {
+		this.sound.play();
+	}
+	this.stop = function() {
+		this.sound.pause();
+	}
 }
 
 function moveup() {
