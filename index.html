@@ -6,13 +6,14 @@
 	<script charset="utf-8" src="script.js"></script>
 	<title>bounce</title>
 </head>
-<body onload="startgame()">
+<body>
 	<div style="text-align:center;width:480px;">
-        <button onclick="moveup()">UP</button><br><br>
+        <!--<button onclick="moveup()">UP</button><br><br>
         <button onclick="moveleft()">LEFT</button>
         <button onclick="moveright()">RIGHT</button><br><br>
-        <button onclick="movedown()">DOWN</button>
-        <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.1)">ACCELERATE</button>
+        <button onclick="movedown()">DOWN</button>-->
+        <button onclick="startgame()">NEW GAME</button>
+        <button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.1)" onclick="playeffect()">ACCELERATE</button>
     </div>
 </body>
 </html>

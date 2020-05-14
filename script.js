@@ -2,14 +2,34 @@ var myGamePiece;
 var myObstacle = [];
 var myNotobstacle = [];
 var myScore;
-var myMusic;
+var mybgmMusic;
+var outmusic;
+var jumpmusic;
+times = 0;
 
 function startgame() {
+	if(times==0){
 	myGameArea.start();
-	myGamePiece = new component(40,40,"assets/blueball1.png",120,360,"image");
+	myGamePiece = new component(40,40,"assets/blueball1.png",220,500,"image");
 	myScore = new component("30px", "Consolas", "black", 280, 40, "text");
-	myMusic = new sound("assets/bgm.mp3");
-	
+	mybgmMusic = new sound("assets/Happybgm.mp3");
+	mybgmMusic.play();
+	outmusic = new sound("assets/gameover.mp3");
+	jumpmusic = new sound("assets/jump.mp3");
+	times+=1;
+	}
+	else {
+		myObstacle = [];
+		myNotobstacle = [];
+		myGameArea.stop();
+		myGameArea.clear();
+		myGameArea.start();
+	    /*myGamePiece = new component(40,40,"assets/blueball1.png",220,500,"image");
+	    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+	    myMusic = new sound("assets/Happybgm.mp3");*/
+	    mybgmMusic.stop();
+        mybgmMusic.play();
+	}
 	}
 
 var myGameArea = {
@@ -146,7 +166,8 @@ function updateGameArea() {
 	for(i=0;i<myObstacle.length;i++) {
 	    if(myGamePiece.crashWith(myObstacle[i])||myGamePiece.crashWith1(myNotobstacle[i])){
 		    myGameArea.stop();
-		    myMusic.play();
+		    mybgmMusic.stop();
+		    outmusic.play();
 		    return;
 	    }
 	}
@@ -154,7 +175,7 @@ function updateGameArea() {
 	myGameArea.clear();
 	myGameArea.frameNo +=1;
 	if(myGameArea.frameNo==1||myGamePiece.y<myObstacle[myObstacle.length-1].y){
-		//everyInterval();
+		
 	  	myObstacle.push(new component(200,100,"assets/redarc1.png",(myGameArea.canvas.width/2)-100,0,"image"));
 	  	myNotobstacle.push(new component(200,100,"assets/bluearc1.png",(myGameArea.canvas.width/2)-100,100,"image"));
 	}
@@ -175,15 +196,16 @@ function updateGameArea() {
 		myObstacle[i].newPosobst();
 		myNotobstacle[i].newPosnotobst();
 	} 
+	everyInterval();
 }
 
 function everyInterval() {
-	if(myGamePiece.y<myObstacle[myObstacle.length-1].y) {
-		myScore.text = "SCORE:"+ myObstacle.length;
-		return true;
-	}
-	else
-		return false;
+	//if(myGamePiece.y<myObstacle[myObstacle.length-1].y) {
+		myScore.text = "SCORE:"+ myObstacle[0].y;
+		//return true;
+	//}
+	//else
+	//	return false;
 }
 
 function accelerate(n) {
@@ -218,4 +240,8 @@ function moveleft() {
 
 function moveright() {
     myGamePiece.speedX += 1; 
+}
+
+function playeffect() {
+	jumpmusic.play();
 }
