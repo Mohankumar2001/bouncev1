@@ -1,20 +1,22 @@
 var myGamePiece;
 var myObstacle = [];
+var myNotobstacle = [];
 var myScore;
 var myMusic;
 
 function startgame() {
 	myGameArea.start();
-	myGamePiece = new component(40,40,"assets/blueball1.png",10,120,"image");
+	myGamePiece = new component(40,40,"assets/blueball1.png",120,360,"image");
 	myScore = new component("30px", "Consolas", "black", 280, 40, "text");
 	myMusic = new sound("assets/bgm.mp3");
 	
 	}
 
 var myGameArea = {
+
 	canvas: document.createElement("canvas"),
 	start: function() {
-		this.canvas.height = 480;
+		this.canvas.height = 600;
 		this.canvas.width = 480;
 		this.context = this.canvas.getContext("2d");
 		this.frameNo = 0;
@@ -29,7 +31,7 @@ var myGameArea = {
     }
 }
 
-function component(width ,height ,color ,x , y,type) {
+function component(width ,height ,color ,x , y, type) {
 	this.type = type;
 	this.height = height;
 	this.width = width;
@@ -40,18 +42,42 @@ function component(width ,height ,color ,x , y,type) {
 	this.gravity = 0.05;
 	this.gravitySpeed = 0;
 	this.bounce = 0.6;
+	this.angle = 0;
+	this.maxHeight = 480;
 	this.newPos = function() {
 		this.gravitySpeed += this.gravity;
 		this.x += this.speedX;
 		this.y += this.speedY + this.gravitySpeed;
 		this.hitBottom();
 	}
+	this.newPosobst = function() {
+		ctx = myGameArea.context;
+		ctx.save();
+		ctx.translate(this.x +100,this.y+100);
+		ctx.rotate(myGamePiece.angle);
+		this.image = new Image();
+		this.image.src = color;
+		ctx.drawImage(this.image, this.width/-2,this.height/-1,this.width,this.height);
+		ctx.restore();
+	}
+	this.newPosnotobst = function() {
+		ctx = myGameArea.context;
+		ctx.save();
+		ctx.translate(this.x +100,this.y);
+		ctx.rotate(myGamePiece.angle);
+		this.image = new Image();
+		this.image.src = color;
+		ctx.drawImage(this.image, this.width/-2,0,this.width,this.height);
+		ctx.restore();
+	}
 	this.update = function() {
 		ctx = myGameArea.context;
-		if(this.type == "text") {			
+		if(this.type == "text") {	
+		    
 			ctx.font = this.width + " " + this.height;
 			ctx.fillStyle = color;
 			ctx.fillText(this.text,this.x,this.y);
+			
 		}
 		else if(this.type == "image") {
 			this.image = new Image();
@@ -61,6 +87,7 @@ function component(width ,height ,color ,x , y,type) {
 		else {
 	        ctx.fillStyle = color;
 	        ctx.fillRect(this.x,this.y,this.width,this.height);
+            
 		}
 		
 	}
@@ -74,10 +101,34 @@ function component(width ,height ,color ,x , y,type) {
 		var otherTop = otherObj.y;
 		var otherBottom = otherObj.y + otherObj.height;
 		var crash = true;
-        if ((myLeft>otherRight)||(myRight<otherLeft)||(myTop>otherBottom)||(myBottom<otherTop)) {
+        if ((myLeft>otherRight)||(myRight<otherLeft)||(myTop>(otherTop+10))||(myBottom<otherTop)) {
+        	    crash = false;
+        }
+        else if(Math.abs(Math.PI-(myGamePiece.angle%(Math.PI*2)))<Math.PI*0.5) {
+        	//alert(Math.abs(Math.PI-(myGamePiece.angle%(Math.PI*2)))*56)
         	crash = false;
         }
         return crash;
+	}
+	this.crashWith1 = function(otherObj) {
+		var myLeft = this.x;
+		var myRight = this.x + this.width;
+		var myTop = this.y;
+		var myBottom = this.y + this.height;
+		var otherLeft = otherObj.x;
+		var otherRight = otherObj.x + otherObj.width;
+		var otherTop = otherObj.y;
+		var otherBottom = otherObj.y + otherObj.height;
+		var crash = true;
+        if ((myLeft>otherRight)||(myRight<otherLeft)||(myTop>otherBottom)||(myBottom<(otherBottom-10))) {
+        	    crash = false;
+        }
+        else if(Math.abs(Math.PI-(myGamePiece.angle%(Math.PI*2)))>Math.PI*0.5) {
+        	//alert(Math.abs(Math.PI-(myGamePiece.angle%(Math.PI*2)))*56)
+        	crash = false;
+        }
+        return crash;
+
 	}
 	this.hitBottom = function() {
 		var rockBottom = myGameArea.canvas.height - this.height;
@@ -93,7 +144,7 @@ function updateGameArea() {
 	var x = myGameArea.canvas.width;
 	var y = myGameArea.canvas.height;
 	for(i=0;i<myObstacle.length;i++) {
-	    if(myGamePiece.crashWith(myObstacle[i])){
+	    if(myGamePiece.crashWith(myObstacle[i])||myGamePiece.crashWith1(myNotobstacle[i])){
 		    myGameArea.stop();
 		    myMusic.play();
 		    return;
@@ -102,24 +153,33 @@ function updateGameArea() {
 	
 	myGameArea.clear();
 	myGameArea.frameNo +=1;
-	if(myGameArea.frameNo==1||everyInterval(150)){
-	  	myObstacle.push(new component(200,10,"blue",myGameArea.canvas.width-200,0))
+	if(myGameArea.frameNo==1||myGamePiece.y<myObstacle[myObstacle.length-1].y){
+		//everyInterval();
+	  	myObstacle.push(new component(200,100,"assets/redarc1.png",(myGameArea.canvas.width/2)-100,0,"image"));
+	  	myNotobstacle.push(new component(200,100,"assets/bluearc1.png",(myGameArea.canvas.width/2)-100,100,"image"));
 	}
-	for(i=0;i<myObstacle.length;i++) {
-		myObstacle[i].y +=1
-		myObstacle[i].update();
-	}
+	myGamePiece.angle += 1 * Math.PI / 180;
 	
 	myScore.update();
 	myGamePiece.newPos();
 	myGamePiece.update();
-
-    
+	if(myGamePiece.y<myGamePiece.maxHeight) {
+		
+		
+		for(i=0;i<myObstacle.length;i++) {
+		    myObstacle[i].y +=(myGamePiece.maxHeight-myGamePiece.y)*0.01;
+		    myNotobstacle[i].y +=(myGamePiece.maxHeight-myGamePiece.y)*0.01;
+	    }
+	} 
+	for(i=0;i<myObstacle.length;i++) {
+		myObstacle[i].newPosobst();
+		myNotobstacle[i].newPosnotobst();
+	} 
 }
 
-function everyInterval(n) {
-	if((myGameArea.frameNo/n)%1 == 0) {
-		myScore.text = "SCORE:"+myGameArea.frameNo/n;
+function everyInterval() {
+	if(myGamePiece.y<myObstacle[myObstacle.length-1].y) {
+		myScore.text = "SCORE:"+ myObstacle.length;
 		return true;
 	}
 	else
