@@ -6,12 +6,26 @@ var mybgmMusic;
 var outmusic;
 var jumpmusic;
 times = 0;
+var temparr = [0,0,0,0,0,0];
+var highscore = {
+	"one" : "0",
+	"two" : "0",
+	"three" : "0",
+	"four" : "0",
+	"five" : "0",
+}
+var myHighScore;
+var currentScore;
+if(localStorage.length==0) {
+	localStorage.setItem("highscore",JSON.stringify(highscore));
+}
 
 function startgame() {
 	if(times==0){
 	myGameArea.start();
 	myGamePiece = new component(40,40,"assets/blueball1.png",220,500,"image");
 	myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+	myHighScore = new component("10px", "Consolas", "black", 10, 40, "text");
 	mybgmMusic = new sound("assets/Happybgm.mp3");
 	mybgmMusic.play();
 	outmusic = new sound("assets/gameover.mp3");
@@ -175,6 +189,21 @@ function updateGameArea() {
 		    myGameArea.stop();
 		    mybgmMusic.stop();
 		    outmusic.play();
+		    highscore = JSON.parse(localStorage.getItem("highscore"));
+		    
+		    temparr[0] = highscore.one;
+		    temparr[1] = highscore.two;
+		    temparr[2] = highscore.three;
+		    temparr[3] = highscore.four;
+		    temparr[4] = highscore.five;
+		    temparr[5] = currentScore;
+            temparr.sort(function(a,b){return b-a});
+		    highscore.one = temparr[0];
+		    highscore.two = temparr[1];
+		    highscore.three = temparr[2];
+		    highscore.four = temparr[3];
+		    highscore.five = temparr[4];
+		    localStorage.setItem("highscore",JSON.stringify(highscore));
 		    return;
 	    }
 	}
@@ -183,12 +212,13 @@ function updateGameArea() {
 	myGameArea.frameNo +=1;
 	if(myGameArea.frameNo==1||myGamePiece.y<myObstacle[myObstacle.length-1].y){
 		
-	  	myObstacle.push(new component(200,100,"assets/redarc1.png",(myGameArea.canvas.width/2)-100,0,"image"));
-	  	myNotobstacle.push(new component(200,100,"assets/bluearc1.png",(myGameArea.canvas.width/2)-100,100,"image"));
+	  	myObstacle.push(new component(200,100,"assets/redarc1.png",(myGameArea.canvas.width/2)-100,-200,"image"));
+	  	myNotobstacle.push(new component(200,100,"assets/bluearc1.png",(myGameArea.canvas.width/2)-100,-100,"image"));
 	}
 	myGamePiece.angle += 1 * Math.PI / 180;
 	
 	myScore.update();
+	myHighScore.update();
 	myGamePiece.newPos();
 	myGamePiece.update();
 	if(myGamePiece.y<myGamePiece.maxHeight) {
@@ -208,7 +238,10 @@ function updateGameArea() {
 
 function everyInterval() {
 	//if(myGamePiece.y<myObstacle[myObstacle.length-1].y) {
-		myScore.text = "SCORE:"+ myObstacle[0].y;
+		highscore = JSON.parse(localStorage.getItem("highscore"));
+		currentScore = Math.floor((myObstacle[0].y/10)+20);
+		myScore.text = "SCORE:"+ currentScore;
+		myHighScore.text = "HIGHSCORES:"+ highscore.one + " " + highscore.two + " " + highscore.three + " " + highscore.four + " " + highscore.five;
 		//return true;
 	//}
 	//else
