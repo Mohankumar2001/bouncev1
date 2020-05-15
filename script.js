@@ -19,6 +19,12 @@ function startgame() {
 	times+=1;
 	}
 	else {
+		myGamePiece.x = 220;
+		myGamePiece.y = 500;
+		myGamePiece.speedX = 0;
+	    myGamePiece.speedY = 0;
+	    myGamePiece.gravity = 0.05;
+	    myGamePiece.gravitySpeed = 0;
 		myObstacle = [];
 		myNotobstacle = [];
 		myGameArea.stop();
@@ -29,6 +35,7 @@ function startgame() {
 	    myMusic = new sound("assets/Happybgm.mp3");*/
 	    mybgmMusic.stop();
         mybgmMusic.play();
+        
 	}
 	}
 
